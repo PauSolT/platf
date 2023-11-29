@@ -10,14 +10,18 @@ public class PlayerMovement : MonoBehaviour
     private InputAction moveAction;
     private Rigidbody2D rb;
 
-    private bool isGrounded = true;
-
+    [SerializeField]
     private float jumpForce = 5f;
-    private float movementSpeed = 10f;
-    
+    [SerializeField]
+    private float acceleration = 10f;
+    [SerializeField]
+    private float maxVelocity = 10f;
+
     private float direction;
     [SerializeField]
-    private float drag = 10;
+    private float maxDrag = 3f;
+    [SerializeField]
+    private float minDrag = 0.5f;
 
     void Awake()
     {
@@ -32,8 +36,6 @@ public class PlayerMovement : MonoBehaviour
         jumpAction.performed += Jump;
         moveAction.performed += Move;
         moveAction.canceled += CancelMove;
-        //jumpAction.performed += Jump;
-        //jumpAction.canceled += Jump;
 
     }
 
@@ -42,8 +44,6 @@ public class PlayerMovement : MonoBehaviour
         jumpAction.performed -= Jump;
         moveAction.performed -= Move;
         moveAction.canceled -= CancelMove;
-        //jumpAction.performed -= Jump;
-        //jumpAction.canceled -= Jump;
     }
 
     // Start is called before the first frame update
@@ -55,35 +55,55 @@ public class PlayerMovement : MonoBehaviour
     private void Move(InputAction.CallbackContext context)
     {
         direction = context.ReadValue<float>();
-        rb.drag = 0;
+        rb.drag = minDrag;
     }
 
     private void CancelMove(InputAction.CallbackContext context)
     {
         direction = 0;
-        rb.drag = drag;
+        if (IsGrounded())
+        {
+            rb.drag = maxDrag;
+        }
     }
 
     private void Jump(InputAction.CallbackContext context)
     {
         print("Jump");
-        TryToJump(isGrounded);
-
+        TryToJump();
     }
 
-    private void TryToJump(bool isPlayerGrounded)
+
+    private void TryToJump()
     {
-        if (isPlayerGrounded)
+        if (IsGrounded())
         {
+            rb.drag = minDrag;
             rb.AddForce(Vector3.up * jumpForce, ForceMode2D.Impulse);
         }
+    }
+
+    private bool IsGrounded()
+    {
+        return rb.velocity.y == 0;
     }
 
 
     // Update is called once per frame
     void FixedUpdate()
     {
-        if(direction != 0)
-            rb.velocity = direction * movementSpeed * Vector2.right;
+        //if(direction != 0)
+        //{
+        //    rb.velocity = new Vector2(direction * movementSpeed, rb.velocity.y);
+        //}
+
+        if (!IsAtMaxVelocity())
+            rb.AddForce(direction * acceleration * Vector2.right);
+
+    }
+
+    private bool IsAtMaxVelocity()
+    {
+        return rb.velocity.x >= maxVelocity || rb.velocity.x <= -maxVelocity;
     }
 }
