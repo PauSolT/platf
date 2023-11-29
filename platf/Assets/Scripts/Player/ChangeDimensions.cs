@@ -21,6 +21,8 @@ public class ChangeDimensions : MonoBehaviour
     [SerializeField]
     int currentDimension = 1;
 
+    bool canChangeDimension = true;
+
 
     void Awake()
     {
@@ -49,6 +51,9 @@ public class ChangeDimensions : MonoBehaviour
 
     private void ChangeDimension(InputAction.CallbackContext context)
     {
+        if (!canChangeDimension)
+            return;
+
         ChangeTilemapAlpha(1f);
         dimensionsCollider[currentDimension].isTrigger = false;
 
@@ -95,9 +100,32 @@ public class ChangeDimensions : MonoBehaviour
         
     }
 
-    // Update is called once per frame
-    void Update()
+
+    private void OnTriggerEnter2D(Collider2D collision)
     {
-        
+        int layer = collision.gameObject.layer;
+        if(layer == 6 || layer == 7 || layer == 8)
+        {
+            canChangeDimension = false;
+        }
     }
+
+    private void OnTriggerStay2D(Collider2D collision)
+    {
+        int layer = collision.gameObject.layer;
+        if (layer == 6 || layer == 7 || layer == 8)
+        {
+            canChangeDimension = false;
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        int layer = collision.gameObject.layer;
+        if (layer == 6 || layer == 7 || layer == 8)
+        {
+            canChangeDimension = true;
+        }
+    }
+
 }
