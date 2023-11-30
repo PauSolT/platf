@@ -109,7 +109,6 @@ public class ChangeDimensions : MonoBehaviour
         playerMovement.Acceleration = 15f;
         playerMovement.MaxVelocity = 8f;
 
-        playerMovement.MaxDrag = 5f;
         playerMovement.JumpForce = 10f;
     }
 
@@ -118,7 +117,6 @@ public class ChangeDimensions : MonoBehaviour
         playerMovement.Acceleration = 21f;
         playerMovement.MaxVelocity = 11f;
 
-        playerMovement.MaxDrag = 5f;
         playerMovement.JumpForce = 10f;
     }
 
@@ -126,15 +124,12 @@ public class ChangeDimensions : MonoBehaviour
     {
         playerMovement.JumpForce = 13f;
 
-        playerMovement.MaxDrag = 5f;
         playerMovement.Acceleration = 15f;
         playerMovement.MaxVelocity = 8f;
     }
 
     private void SwitchToBlueDimension()
     {
-        playerMovement.MaxDrag = 0.5f;
-
         playerMovement.Acceleration = 15f;
         playerMovement.MaxVelocity = 8f;
         playerMovement.JumpForce = 10f;

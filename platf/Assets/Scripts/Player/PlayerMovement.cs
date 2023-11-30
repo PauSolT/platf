@@ -10,11 +10,11 @@ public class PlayerMovement : MonoBehaviour
     private InputAction moveAction;
     private Rigidbody2D rb;
 
-    private float jumpForce = 10f;
+    private float jumpForce = 17f;
     public float JumpForce { get => jumpForce; set => jumpForce = value; }
-    private float acceleration = 10f;
+    private float acceleration = 20f;
     public float Acceleration { get => acceleration; set => acceleration = value; }
-    private float maxVelocity = 5f;
+    private float maxVelocity = 8f;
     public float MaxVelocity { get => maxVelocity; set => maxVelocity = value; }
     private float direction;
 
@@ -22,13 +22,13 @@ public class PlayerMovement : MonoBehaviour
     public float MaxDrag { get => maxDrag; set => maxDrag = value; }
     private readonly float minDrag = 0.25f;
 
-    private readonly float coyoteTime = 0.25f;
-    [SerializeField]
+    private readonly float coyoteTime = 0.2f;
     private float currentCoyoteTime = 0f;
 
-    private readonly float jumpBuffering = 0.25f;
-    [SerializeField]
+    private readonly float jumpBuffering = 0.15f;
     private float currentJumpBuffer = 0f;
+
+    private readonly int layerMasksGround = 1 << 3 | 1 << 6 | 1 << 7 | 1 << 8;
 
     void Awake()
     {
@@ -101,35 +101,39 @@ public class PlayerMovement : MonoBehaviour
 
     private IEnumerator TryToJump()
     {
-        while (currentJumpBuffer > 0f)
+        while (currentJumpBuffer > 0f )
         {
-            if (currentCoyoteTime > 0f)
+            if (currentCoyoteTime > 0f && IsGrounded())
             {
-                print("HELL");
                 currentCoyoteTime = 0f;
                 rb.drag = minDrag;
                 rb.AddForce(Vector3.up * jumpForce, ForceMode2D.Impulse);
                 currentJumpBuffer = 0f;
+
+                // Break out of the coroutine to prevent double jumps
+                yield break;
             }
-        yield return null;
+
+            yield return null;
         }
-        yield return null;
     }
 
     private bool IsGrounded()
     {
-        return rb.velocity.y == 0;
+        Ray ray = new(transform.position, -transform.up);
+
+        RaycastHit2D hit = Physics2D.Raycast(rb.position, Vector2.down, 0.46f, layerMasksGround);
+        if (hit)
+            print(hit.collider.name);
+
+        Debug.DrawRay(ray.origin, ray.direction * 0.46f, Color.green);
+
+
+        return hit.collider != null;
     }
 
-
-    // Update is called once per frame
     void FixedUpdate()
     {
-        //if(direction != 0)
-        //{
-        //    rb.velocity = new Vector2(direction * movementSpeed, rb.velocity.y);
-        //}
-
         if (IsGrounded())
         {
             currentCoyoteTime = coyoteTime;
@@ -137,6 +141,7 @@ public class PlayerMovement : MonoBehaviour
         {
             currentCoyoteTime -= Time.deltaTime;
         }
+
 
 
         if (!IsAtMaxVelocity())
