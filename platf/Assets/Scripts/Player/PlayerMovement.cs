@@ -22,6 +22,14 @@ public class PlayerMovement : MonoBehaviour
     public float MaxDrag { get => maxDrag; set => maxDrag = value; }
     private readonly float minDrag = 0.25f;
 
+    private readonly float coyoteTime = 0.25f;
+    [SerializeField]
+    private float currentCoyoteTime = 0f;
+
+    private readonly float jumpBuffering = 0.25f;
+    [SerializeField]
+    private float currentJumpBuffer = 0f;
+
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -33,6 +41,7 @@ public class PlayerMovement : MonoBehaviour
     private void OnEnable()
     {
         jumpAction.performed += Jump;
+        jumpAction.canceled += CancelJump;
         moveAction.performed += Move;
         moveAction.canceled += CancelMove;
     }
@@ -40,6 +49,7 @@ public class PlayerMovement : MonoBehaviour
     private void OnDisable()
     {
         jumpAction.performed -= Jump;
+        jumpAction.canceled -= CancelJump;
         moveAction.performed -= Move;
         moveAction.canceled -= CancelMove;
     }
@@ -67,18 +77,43 @@ public class PlayerMovement : MonoBehaviour
 
     private void Jump(InputAction.CallbackContext context)
     {
-        print("Jump");
-        TryToJump();
+        currentJumpBuffer = jumpBuffering;
+        StartCoroutine(nameof(TryToJump));
+    }
+
+    private void CancelJump(InputAction.CallbackContext context)
+    {
+        StartCoroutine(nameof(TickCurrentJumpBuffer));
     }
 
 
-    private void TryToJump()
-    {
-        if (IsGrounded())
+    private IEnumerator TickCurrentJumpBuffer()
+    {   
+        while (currentJumpBuffer >0f)
         {
-            rb.drag = minDrag;
-            rb.AddForce(Vector3.up * jumpForce, ForceMode2D.Impulse);
+            currentJumpBuffer -= Time.fixedDeltaTime;
+            yield return new WaitForSeconds(Time.fixedDeltaTime);
         }
+
+        yield return null;
+    }
+
+
+    private IEnumerator TryToJump()
+    {
+        while (currentJumpBuffer > 0f)
+        {
+            if (currentCoyoteTime > 0f)
+            {
+                print("HELL");
+                currentCoyoteTime = 0f;
+                rb.drag = minDrag;
+                rb.AddForce(Vector3.up * jumpForce, ForceMode2D.Impulse);
+                currentJumpBuffer = 0f;
+            }
+        yield return null;
+        }
+        yield return null;
     }
 
     private bool IsGrounded()
@@ -94,6 +129,15 @@ public class PlayerMovement : MonoBehaviour
         //{
         //    rb.velocity = new Vector2(direction * movementSpeed, rb.velocity.y);
         //}
+
+        if (IsGrounded())
+        {
+            currentCoyoteTime = coyoteTime;
+        } else
+        {
+            currentCoyoteTime -= Time.deltaTime;
+        }
+
 
         if (!IsAtMaxVelocity())
             rb.AddForce(direction * acceleration * Vector2.right);
