@@ -10,18 +10,17 @@ public class PlayerMovement : MonoBehaviour
     private InputAction moveAction;
     private Rigidbody2D rb;
 
-    [SerializeField]
-    private float jumpForce = 5f;
-    [SerializeField]
+    private float jumpForce = 10f;
+    public float JumpForce { get => jumpForce; set => jumpForce = value; }
     private float acceleration = 10f;
-    [SerializeField]
-    private float maxVelocity = 10f;
-
+    public float Acceleration { get => acceleration; set => acceleration = value; }
+    private float maxVelocity = 5f;
+    public float MaxVelocity { get => maxVelocity; set => maxVelocity = value; }
     private float direction;
-    [SerializeField]
-    private float maxDrag = 3f;
-    [SerializeField]
-    private float minDrag = 0.5f;
+
+    private float maxDrag = 5f;
+    public float MaxDrag { get => maxDrag; set => maxDrag = value; }
+    private readonly float minDrag = 0.25f;
 
     void Awake()
     {
@@ -36,7 +35,6 @@ public class PlayerMovement : MonoBehaviour
         jumpAction.performed += Jump;
         moveAction.performed += Move;
         moveAction.canceled += CancelMove;
-
     }
 
     private void OnDisable()

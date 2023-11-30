@@ -9,6 +9,7 @@ public class ChangeDimensions : MonoBehaviour
     private PlayerInput playerInput;
     private InputAction changeDimensionAction;
     private SpriteRenderer playerSprite;
+    private PlayerMovement playerMovement;
 
     public Transform world;
     [SerializeField]
@@ -28,6 +29,7 @@ public class ChangeDimensions : MonoBehaviour
     {
         playerInput = GetComponent<PlayerInput>();
         playerSprite = GetComponent<SpriteRenderer>();
+        playerMovement = GetComponent<PlayerMovement>();
         changeDimensionAction = playerInput.actions["ChangeDimension"];
         for (int i = 0; i < world.childCount; i++)
         {
@@ -35,7 +37,7 @@ public class ChangeDimensions : MonoBehaviour
             dimensionsCollider.Add(dimensions[i].GetComponent<TilemapCollider2D>());
             tilemaps.Add(dimensions[i].GetComponent<Tilemap>());
         }
-        ChangeDimension(1);
+        ChangeDimensionHandler(1);
     }
 
     private void OnEnable()
@@ -67,10 +69,10 @@ public class ChangeDimensions : MonoBehaviour
             currentDimension++;
             
         }
-        ChangeDimension(currentDimension);
+        ChangeDimensionHandler(currentDimension);
     }
 
-    private void ChangeDimension(int dimension)
+    private void ChangeDimensionHandler(int dimension)
     {
         if (dimension < 1)
         {
@@ -84,6 +86,58 @@ public class ChangeDimensions : MonoBehaviour
         dimensionsCollider[currentDimension].isTrigger = true;
         playerSprite.color = tilemaps[currentDimension].color;
         ChangeTilemapAlpha(0.4f);
+
+        //switch (currentDimension)
+        //{
+        //    case 1:
+        //        SwitchToRedDimension();
+        //        break;
+        //    case 2:
+        //        SwitchToGreenDimension();
+        //        break;
+        //    case 3:
+        //        SwitchToBlueDimension();
+        //        break;
+        //    default:
+        //        SwitchToUniversalDimension();
+        //        break;
+        //}
+    }
+
+    private void SwitchToUniversalDimension()
+    {
+        playerMovement.Acceleration = 15f;
+        playerMovement.MaxVelocity = 8f;
+
+        playerMovement.MaxDrag = 5f;
+        playerMovement.JumpForce = 10f;
+    }
+
+    private void SwitchToRedDimension()
+    {
+        playerMovement.Acceleration = 21f;
+        playerMovement.MaxVelocity = 11f;
+
+        playerMovement.MaxDrag = 5f;
+        playerMovement.JumpForce = 10f;
+    }
+
+    private void SwitchToGreenDimension()
+    {
+        playerMovement.JumpForce = 13f;
+
+        playerMovement.MaxDrag = 5f;
+        playerMovement.Acceleration = 15f;
+        playerMovement.MaxVelocity = 8f;
+    }
+
+    private void SwitchToBlueDimension()
+    {
+        playerMovement.MaxDrag = 0.5f;
+
+        playerMovement.Acceleration = 15f;
+        playerMovement.MaxVelocity = 8f;
+        playerMovement.JumpForce = 10f;
     }
 
 
